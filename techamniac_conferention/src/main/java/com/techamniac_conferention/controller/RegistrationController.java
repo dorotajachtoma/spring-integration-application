@@ -1,9 +1,12 @@
 package com.techamniac_conferention.controller;
 
 import com.techamniac_conferention.model.AttendeeRegistration;
-import com.techamniac_conferention.service.RegistrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,17 +15,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
+import java.time.OffsetDateTime;
 
 @Controller
 @RequestMapping("/")
 public class RegistrationController {
     private static final Logger LOG = LoggerFactory.getLogger(RegistrationController.class);
 
-    private final RegistrationService registrationService;
+    private final MessageChannel registrationRequestChannel;
 
-    public RegistrationController(RegistrationService registrationService) {
-        this.registrationService = registrationService;
+    public RegistrationController(@Qualifier("registrationRequest") MessageChannel registrationRequestChannel) {
+        this.registrationRequestChannel = registrationRequestChannel;
     }
+
 
     @GetMapping
     public String index(@ModelAttribute("registration") AttendeeRegistration registration) {
@@ -35,9 +40,9 @@ public class RegistrationController {
             LOG.warn("Validation failed: {}", bindingResult);
             return "index";
         }
-
-        registrationService.register(registration);
-
+        Message<AttendeeRegistration> message = MessageBuilder.withPayload(registration)
+                .setHeader("datetime", OffsetDateTime.now())
+                .build();
         return "success";
     }
 }
