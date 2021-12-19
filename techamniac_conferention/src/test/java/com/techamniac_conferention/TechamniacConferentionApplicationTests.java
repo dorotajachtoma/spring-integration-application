@@ -1,0 +1,13 @@
+package com.techamniac_conferention;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class TechamniacConferentionApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
